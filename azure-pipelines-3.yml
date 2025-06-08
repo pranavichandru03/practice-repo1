@@ -1,0 +1,29 @@
+trigger:
+  - main   # Triggers the pipeline when code is pushed to the 'main' branch
+
+pool:
+  name: 'mypool'   # Replace with your own self-hosted agent pool name
+
+steps:
+  # Step 1: Checkout Code
+  - checkout: self
+    displayName: 'Checkout Code from GitHub'
+
+  # Step 2: Build the project and run unit tests
+  - script: mvn clean test
+    displayName: 'Build and Run Unit Tests'
+
+  # Step 3: Publish JUnit Test Results
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
+      testResultsFormat: 'JUnit'
+      failTaskOnMissingResultsFile: true
+    displayName: 'Publish Maven Test Results'
+
+  # Step 4: Publish Build Artifacts (JAR file)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: 'target'                  # Folder where JAR is generated
+      ArtifactName: 'drop'                     # Name for the published artifact
+      publishLocation: 'Container'             # Default Azure DevOps con
